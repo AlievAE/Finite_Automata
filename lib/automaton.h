@@ -65,3 +65,5 @@ private:
     Automaton DFA() const;
 
 };
+
+std::ostream& operator << (std::ostream& out, const Automaton& A);
