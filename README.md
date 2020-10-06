@@ -5,6 +5,7 @@ This repository contains C++ libraries for working with: \
 
 Quick Start \
       1) Run build.sh script \
+            $ chmod +x build.sh \
             $ ./build.sh \
       2) Go to bin directory \
             $ cd bin \
