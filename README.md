@@ -1,7 +1,7 @@
 # Finite_Automata
 This repository contains C++ libraries for working with: \
       - Finite State Machines aka Finite Automata \
-      - Regular Expressions (TODO) \
+      - Regular Expressions (TODO)
 
 Quick Start \
       1) Run build.sh script \
@@ -11,4 +11,4 @@ Quick Start \
       3) To run tests: \
             $ ./AutoTest \
       4) To run main executable file: \
-            $ ./Auto.out \
+            $ ./Auto.out
