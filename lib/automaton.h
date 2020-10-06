@@ -1,14 +1,9 @@
-#pragma once
-
 #include <iostream>
 #include <vector>
 #include <queue>
 #include <map>
 #include <set>
 #include <algorithm>
-
-// #include "regex.h"
-// #include "regex_automaton.h"
 
 class Automaton { // one-letter edges only, 1 = empty symbol
 public:

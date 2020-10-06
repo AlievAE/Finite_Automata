@@ -1,5 +1,3 @@
-#pragma once
-
 #include "automaton.h"
 
 std::ostream& operator << (std::ostream& out, const Automaton& A) {
