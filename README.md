@@ -6,7 +6,7 @@ This repository contains C++ libraries for working with: \
 Quick Start \
       1) Run build.sh script \
             $ ./build.sh \
-      2) Go to bin dirctory \
+      2) Go to bin directory \
             $ cd bin \
       3) To run tests: \
             $ ./AutoTest \
