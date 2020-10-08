@@ -9,10 +9,10 @@ class Automaton { // one-letter edges only, 1 = empty symbol
 public:
     Automaton(std::vector<char> alphabet) :
         alphabet_(alphabet),
-        G_({{}}) {}
+        Graph_({{}}) {}
 
-    void add(int a, int b, char c);
-    void MakeTerminal(int a);
+    void add(int, int, char);
+    void MakeTerminal(int);
     void ClearTerminal() {
         terminal_.clear();
     }
@@ -32,11 +32,11 @@ public:
     Automaton MinDFA() const;
 
     std::vector<std::vector<std::pair<int, char>>> GetGraph() const {
-        return G_;
+        return Graph_;
     }
 
     int Size() const {
-        return G_.size();
+        return Graph_.size();
     }
     std::vector<int> GetTerminal() const {
         return terminal_;
@@ -47,13 +47,13 @@ public:
 
     bool operator ==(const Automaton& aim) {
         return (alphabet_ == aim.alphabet_ && 
-            G_ == aim.G_ &&
+            Graph_ == aim.Graph_ &&
             terminal_ == aim.terminal_);
     }
 
 private:
     std::vector<char> alphabet_;
-    std::vector<std::vector<std::pair<int, char>>> G_;
+    std::vector<std::vector<std::pair<int, char>>> Graph_;
     std::vector<int> terminal_;
 
     std::vector<int> GetSon(int ind) const;

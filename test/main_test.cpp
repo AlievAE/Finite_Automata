@@ -3,7 +3,7 @@
 class TestAutomaton : public ::testing::Test {
     protected: 
         void  SetUp() {
-            A = new Automaton ({'a', 'b'});
+            A = new Automaton ({'a', 'b'}); // (w|a - w|b) % 3 == 0, 9 states, DFA
             for (int i = 0; i < 9; ++i) {
                 int j = i + 1;
                 if (i % 3 == 2) j = i - 2;
@@ -16,50 +16,18 @@ class TestAutomaton : public ::testing::Test {
                 }
             }
 
-            B = new Automaton({'B', 'c'});
+            B = new Automaton({'B', 'c'}); // small DFA with different alphabet
             B->add(0, 1, 'B');
             B->add(1, 2, 'c');
             B->add(2, 1, 'c');
-
-            C = new Automaton({'a', 'b'}); // almost random large DFA
-            for (int i = 0; i < 10; ++i) {
-                C->add(i, (i * i + i + 17) % 10, 'a');
-                C->add(i, ((1 << i) + 3 + i) % 10, 'b');
-                if (i % 2 == 0) {
-                    C->MakeTerminal(i);
-                }
-            }
-
-            D = new Automaton({'a', 'b'});
-            D->add(0, 1, 'a');
-            D->add(1, 1, 'a');
-            D->add(1, 1, 'b');
-            D->add(0, 2, 'b');
-            D->MakeTerminal(1);
-            D->MakeTerminal(2);
-
-            E = new Automaton({'a', 'b'});
-            E->add(0, 0, '1');
-            E->add(0, 1, 'a');
-            E->add(1, 0, '1');
-            E->add(1, 2, 'b');
-            E->add(1, 2, '1');
-            E->add(2, 2, 'a');
-            E->MakeTerminal(2);
         } 
 
         void TearDown() {
             delete A;
             delete B;
-            delete C;
-            delete D;
-            delete E;
         }
         Automaton* A;
         Automaton* B;
-        Automaton* C;
-        Automaton* D;
-        Automaton* E;
 };
 
 TEST_F(TestAutomaton, GetComplete_test1){
@@ -103,6 +71,14 @@ TEST_F(TestAutomaton, MinDFA_test2)
 }
 
 TEST_F(TestAutomaton, GetComplement_test1) {
+    Automaton C ({'a', 'b'}); // almost random large DFA
+    for (int i = 0; i < 10; ++i) {
+        C.add(i, (i * i + i + 17) % 10, 'a');
+        C.add(i, ((1 << i) + 3 + i) % 10, 'b');
+        if (i % 2 == 0) {
+            C.MakeTerminal(i);
+        }
+    }
     Automaton ComplementC({'a', 'b'});
     for (int i = 0; i < 10; ++i) {
         ComplementC.add(i, (i * i + i + 17) % 10, 'a');
@@ -111,10 +87,18 @@ TEST_F(TestAutomaton, GetComplement_test1) {
             ComplementC.MakeTerminal(i);
         }
     }
-    EXPECT_TRUE(C->GetComplement() == ComplementC);
+    EXPECT_TRUE(C.GetComplement() == ComplementC);
 }
 
 TEST_F(TestAutomaton, GetComplement_test2) {
+    Automaton D({'a', 'b'}); // a(a+b)* + b
+    D.add(0, 1, 'a');
+    D.add(1, 1, 'a');
+    D.add(1, 1, 'b');
+    D.add(0, 2, 'b');
+    D.MakeTerminal(1);
+    D.MakeTerminal(2);
+
     Automaton ComplementD({'a', 'b'});
     ComplementD.add(0, 1, 'a');
     ComplementD.add(0, 2, 'b');
@@ -127,10 +111,19 @@ TEST_F(TestAutomaton, GetComplement_test2) {
     ComplementD.MakeTerminal(0);
     ComplementD.MakeTerminal(3);
 
-    EXPECT_TRUE(D->GetComplement() == ComplementD);
+    EXPECT_TRUE(D.GetComplement() == ComplementD);
 }
 
 TEST_F(TestAutomaton, DeleteEmpty_test1) {
+    Automaton E({'a', 'b'}); // small senseless NFA
+    E.add(0, 0, '1');
+    E.add(0, 1, 'a');
+    E.add(1, 0, '1');
+    E.add(1, 2, 'b');
+    E.add(1, 2, '1');
+    E.add(2, 2, 'a');
+    E.MakeTerminal(2);
+
     Automaton NoEmptyE({'a', 'b'});
     NoEmptyE.add(0, 1, 'a');
     NoEmptyE.add(1, 2, 'b');
@@ -139,7 +132,7 @@ TEST_F(TestAutomaton, DeleteEmpty_test1) {
     NoEmptyE.add(2, 2, 'a');
     NoEmptyE.MakeTerminal(1);
     NoEmptyE.MakeTerminal(2);
-    EXPECT_TRUE(E->DeleteEmpty() == NoEmptyE);
+    EXPECT_TRUE(E.DeleteEmpty() == NoEmptyE);
 }
 
 TEST_F(TestAutomaton, DeleteEmpty_test2) {
