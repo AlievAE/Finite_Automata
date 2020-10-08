@@ -1,7 +1,7 @@
 #include "automaton.h"
 
-std::ostream& operator << (std::ostream& out, const Automaton& A) {
-    auto Graph = A.GetGraph();
+std::ostream& operator << (std::ostream& out, const Automaton& automaton) {
+    auto Graph = automaton.GetGraph();
     out << "total vertexes: " << Graph.size() << "\n" << "start: " << 0 << "\n";
     for (int i = 0; i < Graph.size(); ++i) {
         for (auto edge : Graph[i]) {
@@ -9,7 +9,7 @@ std::ostream& operator << (std::ostream& out, const Automaton& A) {
         }
     }
     out << "\nterminal vertexes:\n";
-    auto term = A.GetTerminal();
+    auto term = automaton.GetTerminal();
     for (int el : term) {
         out << el << " ";
     }

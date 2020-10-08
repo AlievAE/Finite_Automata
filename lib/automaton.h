@@ -61,4 +61,4 @@ private:
 
 };
 
-std::ostream& operator << (std::ostream& out, const Automaton& A);
+std::ostream& operator << (std::ostream&, const Automaton&);
