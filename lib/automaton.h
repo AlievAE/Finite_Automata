@@ -56,7 +56,7 @@ private:
     std::vector<std::vector<std::pair<int, char>>> Graph_;
     std::vector<int> terminal_;
 
-    std::vector<int> GetSon(int ind) const;
+    std::vector<int> GetSon(int ind) const; // find all reachable verteces from ind, using empty edges
     Automaton DFA() const;
 
 };

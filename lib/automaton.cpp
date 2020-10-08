@@ -63,14 +63,15 @@ Automaton Automaton::DeleteEmpty() const {
     return res;
 }
 
-std::vector<int> Automaton::GetSon(int ind) const { // find all reachable verteces from ind, using empty edges
-    std::vector<int> res;
+std::vector<int> Automaton::GetSon(int ind) const {
+    std::vector<int> res; // BFS preprocessing
     res.push_back(ind);
     std::vector<bool> used;
     used.assign(Graph_.size(), false);
     used[ind] = true;
     std::queue<int> process;
     process.push(ind);
+
     while (!process.empty()) { // BFS start
         int cur_vertex = process.front();
         process.pop();
