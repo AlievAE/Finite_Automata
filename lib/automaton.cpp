@@ -31,12 +31,14 @@ void Automaton::add(int start, int finish, char symbol) {
 }
 
 void Automaton::MakeTerminal(int vertex) {
-    int sz = Graph_.size();
-    for (int i = 0; i < vertex - sz + 1; ++i) {
+    int graph_size = Graph_.size();
+    for (int i = 0; i < vertex - graph_size + 1; ++i) {
         Graph_.push_back({});
     }
-    for (auto el : terminal_) {
-        if (el == vertex) return;
+    for (auto term : terminal_) {
+        if (term == vertex) {
+            return;
+        }
     }
     terminal_.push_back(vertex);
 }
@@ -46,9 +48,9 @@ Automaton Automaton::DeleteEmpty() const {
     for (int i = 0; i < Graph_.size(); ++i) {
         std::vector<int> children = GetSon(i);
         for (int son : children) {
-            for (auto edge : Graph_[son]) {
-                if (edge.second != '1') {
-                    res.add(i, edge.first, edge.second);
+            for (auto [vertex, symbol] : Graph_[son]) {
+                if (symbol != '1') {
+                    res.add(i, vertex, symbol);
                 }
             }
             for (int term : terminal_) {
@@ -61,23 +63,23 @@ Automaton Automaton::DeleteEmpty() const {
     return res;
 }
 
-std::vector<int> Automaton::GetSon(int ind) const {
+std::vector<int> Automaton::GetSon(int ind) const { // find all reachable verteces from ind, using empty edges
     std::vector<int> res;
+    res.push_back(ind);
     std::vector<bool> used;
     used.assign(Graph_.size(), false);
-    std::queue<int> bfs_q;
-    bfs_q.push(ind);
-    res.push_back(ind);
     used[ind] = true;
-    while (!bfs_q.empty()) {
-        int cur_vertex = bfs_q.front();
-        bfs_q.pop();
-        for (auto edge : Graph_[cur_vertex]) {
-            if (edge.second != '1') continue;
-            if (!used[edge.first]) {
-                used[edge.first] = true;
-                res.push_back(edge.first);
-                bfs_q.push(edge.first);
+    std::queue<int> process;
+    process.push(ind);
+    while (!process.empty()) { // BFS start
+        int cur_vertex = process.front();
+        process.pop();
+        for (auto [vertex, symbol] : Graph_[cur_vertex]) {
+            if (symbol != '1') continue;
+            if (!used[vertex]) {
+                used[vertex] = true;
+                res.push_back(vertex);
+                process.push(vertex);
             }
         }
     }
@@ -89,15 +91,17 @@ Automaton Automaton::DFA() const {
 
     std::map<std::set<int>, int> index_of_subset;
     std::vector<std::set<int>> subset;
-    std::queue<int> bfs_q;
+    std::queue<int> process;
 
-    bfs_q.push(0);
-    subset.push_back({0});
-    index_of_subset[{0}] = 0;
 
-    while (!bfs_q.empty()) {
-        auto cur_vertex = bfs_q.front();
-        bfs_q.pop();
+    const int root = 0;
+    process.push(root);
+    subset.push_back({root});
+    index_of_subset[{root}] = 0;
+
+    while (!process.empty()) {
+        auto cur_vertex = process.front();
+        process.pop();
         for (char symbol: alphabet_) {
             std::set<int> vertex;
             for (int v : subset[cur_vertex]) {
@@ -107,21 +111,23 @@ Automaton Automaton::DFA() const {
                     }
                 }
             }  
-            if (vertex.empty()) continue;
+            if (vertex.empty()) {
+                continue;
+            }
             if (index_of_subset.find(vertex) != index_of_subset.end()) {
                 res.add(cur_vertex, index_of_subset[vertex], symbol);
             } else {
                 subset.push_back(vertex);
                 index_of_subset[vertex] = subset.size() - 1;
-                bfs_q.push(subset.size() - 1);
+                process.push(subset.size() - 1);
                 res.add(cur_vertex, index_of_subset[vertex], symbol);
             }
         }
     }
 
     for (int i = 0; i < subset.size(); ++i) {
-        for (int el : subset[i]) {
-            if (std::find(terminal_.begin(), terminal_.end(), el) != terminal_.end()) {
+        for (int state : subset[i]) {
+            if (std::find(terminal_.begin(), terminal_.end(), state) != terminal_.end()) {
                 res.MakeTerminal(i);
                 break;
             }
@@ -211,21 +217,21 @@ Automaton Automaton::MinDFA() const {
     while (true) {
         std::vector<int> next;
         next.assign(cDFA.alphabet_.size() + 1, 0);
-        std::map<std::vector<int>, int> new_cat;
+        std::map<std::vector<int>, int> equivalence_class;
         for (int i = 0; i < cDFA.Size(); ++i) {
             next[0] = category[i];
             for (auto [vertex, symbol] : cDFA.Graph_[i]) {
                 next[alphabet_index[symbol] + 1] = category[vertex];
             }
-            if (new_cat.find(next) != new_cat.end()) {
-                next_category[i] = new_cat[next];
+            if (equivalence_class.find(next) != equivalence_class.end()) {
+                next_category[i] = equivalence_class[next];
             } else {
-                next_category[i] = new_cat.size();
-                new_cat[next] = next_category[i];
+                next_category[i] = equivalence_class.size();
+                equivalence_class[next] = next_category[i];
             }
         } 
         int old_size = (*std::max_element(category.begin(), category.end())) + 1;
-        if (new_cat.size() == old_size) {
+        if (equivalence_class.size() == old_size) {
             Automaton res(cDFA.alphabet_);
             for (int i = 0; i < cDFA.Size(); ++i) {
                 for (auto [vertex, symbol] : cDFA.Graph_[i]) {
