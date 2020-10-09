@@ -31,8 +31,18 @@ public:
 
     Automaton MinDFA() const;
 
+    Automaton Intersect(const Automaton&) const;
+
+    bool isEquivalent(const Automaton&) const;
+
+    std::string Discriminator(const Automaton&) const; //returns any word discriminating automata
+
     std::vector<std::vector<std::pair<int, char>>> GetGraph() const {
         return Graph_;
+    }
+
+    bool isTerminal(int index) const {
+        return std::find(terminal_.begin(), terminal_.end(), index) != terminal_.end();
     }
 
     int Size() const {
@@ -58,6 +68,7 @@ private:
 
     std::vector<int> GetSon(int ind) const; // find all reachable verteces from ind, using empty edges
     Automaton DFA() const;
+    bool AnyWord(std::vector<int>&, std::string&, std::string&, int) const;
 
 };
 

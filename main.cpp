@@ -1,4 +1,4 @@
-#include "lib/automaton.h"
+#include "lib/automaton.cpp"
 
 Automaton Task1() {
     Automaton A({'a', 'b'});
@@ -34,6 +34,28 @@ Automaton Task2() {
     return A.GetDFA().GetComplement().MinDFA();
 }
 
+std::string Test() {
+    Automaton A({'a', 'b'});
+    A.add(0, 1, 'a');
+    A.add(0, 2, 'a');
+    A.add(1, 1, 'b');
+    A.add(1, 2, 'b');
+    A.add(0, 3, 'b');
+    A.add(3, 3, 'a');
+    A.add(3, 2, 'a');
+    A.MakeTerminal(2);
+    Automaton B({'a', 'b', 'c'});
+    B.add(0, 1, 'a');
+    B.add(0, 2, 'b');
+    B.add(0, 3, 'b');
+    B.add(1, 1, 'b');
+    B.add(1, 2, 'b');
+    B.add(3, 3, 'a');
+    B.add(3, 2, 'a');
+    B.MakeTerminal(2);
+    return B.Discriminator(A);
+}
+
 int main() {
-    std::cout << Task2();
+    std::cout << Test();
 }

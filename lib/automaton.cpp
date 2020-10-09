@@ -128,7 +128,7 @@ Automaton Automaton::DFA() const {
 
     for (int i = 0; i < subset.size(); ++i) {
         for (int state : subset[i]) {
-            if (std::find(terminal_.begin(), terminal_.end(), state) != terminal_.end()) {
+            if (isTerminal(state)) {
                 res.MakeTerminal(i);
                 break;
             }
@@ -246,4 +246,93 @@ Automaton Automaton::MinDFA() const {
         }
         category.swap(next_category);
     }
+}
+
+Automaton Automaton::Intersect(const Automaton& right) const {
+    Automaton Left = DeleteEmpty();
+    Automaton Right = right.DeleteEmpty();
+    Automaton res(alphabet_);
+    std::map<std::pair<int, int>, int> used;
+    const int root = 0;
+    used[{root, root}] = 0;
+    std::vector<std::pair<int, int>> vertex;
+    vertex.push_back({root, root});
+    std::queue<int> process;
+    process.push(0);
+    while (!process.empty()) {
+        int state = process.front();
+        process.pop();
+        int left_state = vertex[state].first;
+        int right_state = vertex[state].second;
+        for (auto [left_vertex, left_symbol] : Left.Graph_[left_state]) {
+            for (auto [right_vertex, right_symbol] : Right.Graph_[right_state]) {
+                if (left_symbol == right_symbol) {
+                    std::pair<int, int> new_vertex = {left_vertex, right_vertex};
+                    if (used.find(new_vertex) == used.end()) {
+                        used[new_vertex] = vertex.size();
+                        vertex.push_back(new_vertex);
+                        process.push(used[new_vertex]);
+                    }
+                    res.add(state, used[new_vertex], left_symbol);
+                }
+            }
+        }
+    }
+    for (int i = 0; i < vertex.size(); ++i) {
+        int left_vertex = vertex[i].first;
+        int right_vertex = vertex[i].second;
+        if (Left.isTerminal(left_vertex) && Right.isTerminal(right_vertex)) {
+            res.MakeTerminal(i);
+        }
+    }
+    return res;
+}
+
+bool Automaton::isEquivalent(const Automaton& right) const {
+    Automaton Left = GetDFA();
+    Automaton Right = right.GetDFA();
+    Automaton onlyLeft = Left.Intersect(Right.GetComplement());
+    Automaton onlyRight = Right.Intersect(Left.GetComplement());
+    return (onlyLeft.terminal_.empty() && onlyRight.terminal_.empty());
+}
+
+bool Automaton::AnyWord(std::vector<int>& used, std::string& answer, std::string& path, int start) const {
+    used[start] = true;
+    if (isTerminal(start)) {
+        answer = path;
+        return true;
+    }
+    for (auto [vertex, symbol] : Graph_[start]) {
+        if (used[vertex]) {
+            continue;
+        }
+        path += symbol;
+        if (AnyWord(used, answer, path, vertex)) {
+            return true;
+        }
+        path.pop_back();
+    }
+    return false;
+}
+
+std::string Automaton::Discriminator(const Automaton& right) const {
+    Automaton Left = GetDFA();
+    Automaton Right = right.GetDFA();
+    Automaton onlyLeft = Left.Intersect(Right.GetComplement());
+    Automaton onlyRight = Right.Intersect(Left.GetComplement());
+    std::string res = "";
+    std::string path = "";
+    std::vector<int> used;
+    int root = 0;
+    if (!onlyLeft.terminal_.empty()) {
+        used.assign(onlyLeft.Size(), false);
+        onlyLeft.AnyWord(used, res, path, 0);
+    } else if (!onlyRight.terminal_.empty()) {
+        used.assign(onlyRight.Size(), false);
+        onlyRight.AnyWord(used, res, path, 0);
+    } else {
+        std::cerr << "no discriminator found" << std::endl;
+        return "$$$DISCRIMINATOR FAIL!!!!!";
+    }
+    return res;
 }
