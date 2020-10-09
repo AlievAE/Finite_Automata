@@ -1,4 +1,4 @@
-#include "lib/automaton.cpp"
+#include "lib/automaton.h"
 
 Automaton Task1() {
     Automaton A({'a', 'b'});
